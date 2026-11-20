@@ -954,12 +954,11 @@ body[data-plan="free"] .wm-bar-live{display:block}
 
 <div class="bar"><div class="in">
   <input type="text" id="fname" placeholder="File name (optional)" aria-label="PDF file name" autocomplete="off">
-    <select id="pq" aria-label="Photo quality in PDF">
+  <select id="pq" aria-label="Photo quality in PDF">
     <option value="o">Original size (100%)</option>
     <option value="h">Half size (1/2)</option>
     <option value="t">1/3rd size (Compact)</option>
   </select>
-
   <button type="button" class="up-btn" id="b_up">
     <svg class="ic ic-sm" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
     Plans (₹99 / ₹149)
@@ -1187,7 +1186,7 @@ function buildPdf(J,D,F){
 
 /* ===== Strict Anti-AI Flattened Watermark PDF Builder (Free Plan Only) ===== */
 async function buildFreeWatermarkedPdf(J,D){
-  const PW=794,PH=1123,SC=2;
+  const PW=794,PH=1123,SC=D.pq==='t'?1.25:(D.pq==='h'?1.55:2),JQ=D.pq==='t'?0.64:(D.pq==='h'?0.78:0.88);
   const doc=new J({unit:'pt',format:[595.28,841.89],compress:true});
   const loadIm=src=>new Promise(res=>{if(!src){res(null);return}const im=new Image();im.onload=()=>res(im);im.onerror=()=>res(null);im.src=src});
   const rRect=(ctx,x,y,w,h,r)=>{
@@ -1324,7 +1323,7 @@ async function buildFreeWatermarkedPdf(J,D){
     }
   }
   applyStrictWatermark(ctx);
-  doc.addImage(cv.toDataURL('image/jpeg',0.86),'JPEG',0,0,595.28,841.89,undefined,'FAST');
+  doc.addImage(cv.toDataURL('image/jpeg',JQ),'JPEG',0,0,595.28,841.89,undefined,'FAST');
 
   // Page 2
   if(D.cells&&D.cells.length){
@@ -1339,7 +1338,7 @@ async function buildFreeWatermarkedPdf(J,D){
       stampPhotoLock(ctx,c.x,c.y,c.w,c.h,0);
     }
     applyStrictWatermark(ctx);
-    doc.addImage(cv.toDataURL('image/jpeg',0.86),'JPEG',0,0,595.28,841.89,undefined,'FAST');
+    doc.addImage(cv.toDataURL('image/jpeg',JQ),'JPEG',0,0,595.28,841.89,undefined,'FAST');
   }
   return doc;
 }
@@ -2021,7 +2020,6 @@ async function resizeForPdf(p,mode){
   return out.length<base.length?out:base;
 }
 async function collect(){
-  
   document.querySelectorAll('.page').forEach(p=>p.style.transform='none');
   const pr=$('sheet1').getBoundingClientRect(),v=TH[theme]||TH.wine,t1=[];
   const decs=q=>[...document.querySelectorAll(q)].filter(e=>getComputedStyle(e).display!=='none').map(e=>({
@@ -2053,15 +2051,18 @@ async function collect(){
     s.querySelectorAll('.l').forEach(e=>grab(e,'barlowi',v[2],0));
     s.querySelectorAll('.v').forEach(e=>grab(e,'barlow',v[1],0));
   });
-    const pick=p=>$('pq').value==='s'?p.src:(p.orig||p.src);
-  const cells=hide2?[]:[...$('col').children].map((d,i)=>{
+  const mode=$('pq').value;
+  const rawCells=hide2?[]:[...$('col').children].map((d,i)=>{
     const p=extra[i];if(!p)return null;
-    return{img:pick(p),iw:p.iw,ih:p.ih,c:p.c,x:50+parseFloat(d.style.left),y:70+parseFloat(d.style.top),w:parseFloat(d.style.width),h:parseFloat(d.style.height)};
+    return{p,x:50+parseFloat(d.style.left),y:70+parseFloat(d.style.top),w:parseFloat(d.style.width),h:parseFloat(d.style.height)};
   }).filter(Boolean);
-  const main_=main&&!hideMain?{img:pick(main),iw:main.iw,ih:main.ih,c:main.c}:null;
   scale();
+  const cells=await Promise.all(rawCells.map(async r=>({
+    img:await resizeForPdf(r.p,mode),iw:r.p.iw,ih:r.p.ih,c:r.p.c,x:r.x,y:r.y,w:r.w,h:r.h
+  })));
+  const main_=main&&!hideMain?{img:await resizeForPdf(main,mode),iw:main.iw,ih:main.ih,c:main.c}:null;
   return{
-    tpl,fr:hideMain?null:fr,
+    tpl,pq:mode,fr:hideMain?null:fr,
     dec1:decs('#sheet1 .dec'),brd1:brds('#sheet1 .dec-b'),
     dec2:decs('#sheet2 .dec'),brd2:brds('#sheet2 .dec-b'),
     th:{dark:v[1],mid:v[2],bg:v[3],band:v[4],blob:v[5]},
@@ -2076,8 +2077,8 @@ async function exportPdf(){
     msg(paid?'Building clean HD PDF\u2026':'Building Free watermarked PDF\u2026');
     await new Promise(r=>setTimeout(r,40));
     await document.fonts.ready;
-    const D=collect();
-const doc=paid
+    const D=await collect();
+    const doc=paid
       ? buildPdf(window.jspdf.jsPDF,D,window.FONTS)
       : await buildFreeWatermarkedPdf(window.jspdf.jsPDF,D);
     const blob=doc.output('blob');
@@ -2158,7 +2159,8 @@ function applyData(o){
   if(TH[o.theme])theme=o.theme;else if(o.theme==='maroon')theme='wine';
   if(o.tpl>=1&&o.tpl<=12)tpl=o.tpl;
   if(o.fname)$('fname').value=o.fname;
-  if(o.pq==='s'||o.pq==='o')$('pq').value=o.pq;
+  if(o.pq==='o'||o.pq==='h'||o.pq==='t')$('pq').value=o.pq;
+  else if(o.pq==='s')$('pq').value='h';
   if(o.hid&&typeof o.hid==='object')hid={...o.hid};
   if(o.hidSec&&typeof o.hidSec==='object')hidSec={...o.hidSec};
   if(Array.isArray(o.ho)){hideMain=!!o.ho[0];hide2=!!o.ho[1]}
