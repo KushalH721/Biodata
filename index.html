@@ -312,6 +312,11 @@ label.ck input[type=checkbox]{
 .btn-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
 .btn-row .sm{margin-top:0}
 
+/* Chips (used inside Crop modal for individual photo ratio) */
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.chip{margin:0;padding:5px 10px;border-radius:999px;font-size:12px}
+.chip.on{background:var(--acc);color:var(--accfg);border-color:var(--acc)}
+
 /* Dynamic Field Wrapper */
 .fw{
   border-top:1px solid var(--line);
@@ -335,20 +340,29 @@ label.ck input[type=checkbox]{
 .fc .sm.ic-only{width:30px;padding:0}
 .fc select{flex:1 1 120px;min-width:0;padding:4px 8px;height:30px;font-size:12px;background:var(--card)}
 
-/* Photo Thumbnails Grid */
-#th{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:8px;margin-top:10px}
+/* Photo Thumbnails Grid (2-row controls: < Crop >  |  - Lock + X) */
+#th{display:grid;grid-template-columns:repeat(auto-fill,minmax(142px,1fr));gap:9px;margin-top:10px}
 .tb{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--card-sub)}
-.ti{height:82px;background:center/cover}
-.tbs{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line)}
-.tbs button{
-  display:inline-flex;align-items:center;justify-content:center;
+.ti{height:84px;background:center/cover;position:relative}
+.ti-sz{
+  position:absolute;right:5px;bottom:5px;
+  font-size:10px;font-weight:700;padding:2px 6px;border-radius:999px;
+  background:rgba(44,6,16,.76);color:#F5EBD0;backdrop-filter:blur(4px);
+}
+.tbs-r1{display:grid;grid-template-columns:1fr 1.6fr 1fr;border-top:1px solid var(--line)}
+.tbs-r2{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line)}
+.tbs-r1 button,.tbs-r2 button{
+  display:inline-flex;align-items:center;justify-content:center;gap:3px;
   border:0;border-right:1px solid var(--line);
   background:transparent;color:var(--fg);
-  padding:8px 0;cursor:pointer;transition:background .12s,color .12s;
+  font:inherit;font-size:11.5px;font-weight:600;
+  padding:7px 0;cursor:pointer;transition:background .12s,color .12s;
 }
-.tbs button:last-child{border-right:0}
-.tbs button:hover:not(:disabled){background:var(--acc-soft);color:var(--acc)}
-.tbs button:disabled{opacity:.3;cursor:default}
+.tbs-r1 button:last-child,.tbs-r2 button:last-child{border-right:0}
+.tbs-r1 button:hover:not(:disabled),.tbs-r2 button:hover:not(:disabled){background:var(--acc-soft);color:var(--acc)}
+.tbs-r2 button.locked{background:var(--acc);color:var(--accfg)}
+.tbs-r2 button.del-b:hover{background:var(--danger-soft);color:var(--danger)}
+.tbs-r1 button:disabled,.tbs-r2 button:disabled{opacity:.3;cursor:default}
 
 /* Preview Stage (Desktop Sticky Canvas) */
 #stage{
@@ -388,7 +402,7 @@ label.ck input[type=checkbox]{
   border-radius:4px;
   overflow:hidden;background:#fff;
 }
-#p2wrap .pw:last-child{margin-bottom:4px}
+#p2wrap .pw{margin-bottom:4px}
 
 /* Live Preview Free Watermark Overlay */
 .wm-live{
@@ -734,7 +748,7 @@ body[data-plan="free"] .wm-bar-live{display:block}
       </div>
       <div class="brand-txt">
         <h1>Marriage Bio-Data Maker</h1>
-        <p>HK721.com • Luxury templates, multi-profile storage &amp; HD PDF</p>
+        <p>HK721.com • Luxury templates, smart collage &amp; HD PDF</p>
       </div>
     </div>
     <div class="hdr-right">
@@ -816,7 +830,7 @@ body[data-plan="free"] .wm-bar-live{display:block}
           <div class="cdd" id="th_dd">
             <button type="button" class="cdd-btn" id="th_btn" aria-haspopup="listbox" aria-expanded="false">
               <span class="cdd-dot" id="th_dot"></span>
-              <span class="cdd-lbl" id="th_lbl">Wine Red</span>
+              <span class="cdd-lbl" id="th_lbl">Wine &amp; Sand</span>
               <svg class="ic ic-sm cdd-chev" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
             </button>
             <div class="cdd-menu" id="th_menu" role="listbox" aria-label="Colour theme options"></div>
@@ -855,21 +869,25 @@ body[data-plan="free"] .wm-bar-live{display:block}
       </button>
 
       <label class="ck"><input type="checkbox" id="ck1" checked> Show main photo on page 1</label>
-      <label class="ck"><input type="checkbox" id="ck2" checked> Show photo gallery pages (Page 2+)</label>
-      <div class="cap">Every photo is auto-sized uniformly (6 per page; 7th photo starts Page 3 automatically).</div>
+      <label class="ck"><input type="checkbox" id="ck2" checked> Show page 2 (photo collage)</label>
+      <div class="cap">Photos keep their natural ratio &amp; auto-fit into balanced rows. Use <b>−</b> / <b>+</b> to make photos smaller or bigger, <b>Crop</b> to adjust, and <b>Lock</b> to freeze size.</div>
 
-      <label>Gallery photos (Page 2+)</label>
+      <label>Page 2 photos (smart auto-fit collage)</label>
       <div class="file-drop">
         <svg class="ic" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-        <div>Add gallery photos<small>Uniform size automatically applied to all photos</small></div>
+        <div>Add page 2 photos<small>Select one or multiple photos — natural ratio preserved</small></div>
         <input type="file" id="pe" accept="image/*,.heic,.heif" multiple>
       </div>
 
       <div id="th"></div>
       <div class="btn-row">
+        <button class="sm" id="rs" type="button" style="display:none">
+          <svg class="ic ic-sm" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+          Reset sizes
+        </button>
         <button class="sm danger" id="clr" type="button" style="display:none">
           <svg class="ic ic-sm" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-          Remove all gallery photos
+          Remove all
         </button>
       </div>
     </div>
@@ -909,7 +927,28 @@ body[data-plan="free"] .wm-bar-live{display:block}
       <div class="wm-bar-live">FREE PREVIEW • HK721.COM • UPGRADE TO REMOVE WATERMARK</div>
     </div></div>
 
-    <div id="p2wrap"></div>
+    <div id="p2wrap" style="display:none">
+      <div class="page-label">
+        <svg class="ic ic-sm" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        Page 2
+      </div>
+      <div class="pw"><div class="page" id="sheet2">
+        <div class="s2"></div><div class="s3"></div>
+        <div class="dec p4"></div><div class="dec p5"></div><div class="dec p6"></div>
+        <div class="dec-b p7o"></div><div class="dec-b p7i"></div>
+        <div class="dec p8a"></div><div class="dec p8b"></div><div class="dec p8c"></div>
+        <div class="dec p9"></div>
+        <div class="dec p10"></div>
+        <div class="dec p11a"></div><div class="dec p11b"></div>
+        <div class="dec p12a"></div><div class="dec p12b"></div>
+        <div class="blob t1d" style="left:-70px;top:-90px;width:330px;height:330px;opacity:.4"></div>
+        <div class="blob t1d" style="left:250px;top:900px;width:800px;height:800px;opacity:.5"></div>
+        <div class="col" id="col"></div>
+        <div class="ft"></div>
+        <div class="wm-live"></div>
+        <div class="wm-bar-live">FREE PREVIEW • HK721.COM • UPGRADE TO REMOVE WATERMARK</div>
+      </div></div>
+    </div>
   </div>
 </div>
 
@@ -951,7 +990,7 @@ body[data-plan="free"] .wm-bar-live{display:block}
         <ul class="plan-list">
           <li><svg class="ic ic-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg><span><b>3 clean PDF downloads</b> (no watermark)</span></li>
           <li><svg class="ic ic-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg><span>All 12 design templates &amp; 24 colours</span></li>
-          <li><svg class="ic ic-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg><span>HD original photo quality &amp; Page 2+ gallery</span></li>
+          <li><svg class="ic ic-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg><span>HD original photo quality &amp; smart Page 2 collage</span></li>
           <li><svg class="ic ic-sm" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg><span>Crisp printable vector typography</span></li>
         </ul>
         <button type="button" class="plan-btn" data-buy="pack99">Select ₹99 Plan</button>
@@ -1020,9 +1059,7 @@ body[data-plan="free"] .wm-bar-live{display:block}
 <div class="modal-bg" id="profileModal" hidden>
   <div class="modal" role="dialog" aria-modal="true" aria-label="User Profile">
     <div class="m-head">
-      <div>
-        <h3>My Profile</h3>
-      </div>
+      <div><h3>My Profile</h3></div>
       <button type="button" class="m-close" data-close="profileModal" aria-label="Close">
         <svg class="ic ic-sm" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
@@ -1067,10 +1104,11 @@ body[data-plan="free"] .wm-bar-live{display:block}
   </div>
 </div>
 
-<!-- Crop Modal -->
+<!-- Crop Modal (with per-photo aspect ratio chips for Page 2) -->
 <div id="cr" hidden>
   <div class="cb">
     <div class="cap" style="margin-top:0">Drag the box to move it. Drag a corner to resize.</div>
+    <div id="cc" class="chips"></div>
     <div id="cs"><div id="cx"><i data-c="nw"></i><i data-c="ne"></i><i data-c="sw"></i><i data-c="se"></i></div></div>
     <div class="cbt">
       <button class="sm" id="crs" type="button">
@@ -1133,23 +1171,19 @@ function buildPdf(J,D,F){
     else{fill(th.band);RR(f.x+f.b,f.y+f.b,f.w-2*f.b,f.h-2*f.b,Math.max(f.r-f.b,0),'F')}
   }
   texts(D.t1);
-  // Page 2+
-  (D.photoPages||[]).forEach(pageCells=>{
-    if(!pageCells.length)return;
+  // Page 2 (justified-rows smart collage)
+  if(D.cells&&D.cells.length){
     doc.addPage();
     bg([[-70,-90,330,.4],[250,900,800,.5]]);
     (D.dec2||[]).forEach(e=>{fill(e.c);R(e.x,e.y,e.w,e.h,'F')});
     drawBorders(D.brd2);
     if(t===2){fill(th.dark);R(0,0,26,1123,'F')}else if(t===3){fill(th.dark);R(0,0,794,26,'F')}
-    pageCells.forEach(c=>photo(c,c.x,c.y,c.w,c.h,0));
-  });
+    D.cells.forEach(c=>photo(c,c.x,c.y,c.w,c.h,0));
+  }
   return doc;
 }
 
-/* ===== Strict Anti-AI Flattened Watermark PDF Builder (Free Plan Only) =====
-   Flattens entire page + multi-layer interlocking dual-contrast HK721.COM security
-   watermark + guilloché mesh directly into a single rasterized image per page so
-   PDF editors cannot delete layers and AI watermark removers cannot cleanly strip it. */
+/* ===== Strict Anti-AI Flattened Watermark PDF Builder (Free Plan Only) ===== */
 async function buildFreeWatermarkedPdf(J,D){
   const PW=794,PH=1123,SC=2;
   const doc=new J({unit:'pt',format:[595.28,841.89],compress:true});
@@ -1169,19 +1203,13 @@ async function buildFreeWatermarkedPdf(J,D){
   };
   const stampPhotoLock=(ctx,x,y,w,h,r)=>{
     ctx.save();rRect(ctx,x,y,w,h,r);ctx.clip();
-    // Fine security mesh baked onto photo pixels
     ctx.strokeStyle='rgba(245,235,208,0.22)';ctx.lineWidth=1;
-    for(let d=-h;d<w+h;d+=18){
-      ctx.beginPath();ctx.moveTo(x+d,y);ctx.lineTo(x+d-h,y+h);ctx.stroke();
-    }
+    for(let d=-h;d<w+h;d+=18){ctx.beginPath();ctx.moveTo(x+d,y);ctx.lineTo(x+d-h,y+h);ctx.stroke()}
     ctx.strokeStyle='rgba(127,1,31,0.18)';
-    for(let d=-h;d<w+h;d+=24){
-      ctx.beginPath();ctx.moveTo(x+d,y);ctx.lineTo(x+d+h,y+h);ctx.stroke();
-    }
-    // Dual-contrast embossed HK721.COM across photo center & diagonals
+    for(let d=-h;d<w+h;d+=24){ctx.beginPath();ctx.moveTo(x+d,y);ctx.lineTo(x+d+h,y+h);ctx.stroke()}
     ctx.translate(x+w/2,y+h/2);ctx.rotate(-0.46);
     ctx.textAlign='center';ctx.textBaseline='middle';
-    const fs=Math.max(20,Math.round(Math.min(w,h)*0.15));
+    const fs=Math.max(18,Math.round(Math.min(w,h)*0.15));
     ctx.font=`700 ${fs}px "Inter",sans-serif`;
     [-fs*2.2,0,fs*2.2].forEach(oy=>{
       ctx.lineWidth=3.5;ctx.strokeStyle='rgba(245,235,208,0.52)';ctx.strokeText('HK721.COM',0,oy);
@@ -1190,7 +1218,6 @@ async function buildFreeWatermarkedPdf(J,D){
     ctx.restore();
   };
   const applyStrictWatermark=ctx=>{
-    // 1. Interlocking Guilloché Security Wave Lines across full A4 sheet
     ctx.save();
     for(let y=0;y<PH;y+=28){
       ctx.beginPath();
@@ -1202,8 +1229,6 @@ async function buildFreeWatermarkedPdf(J,D){
       ctx.lineWidth=1;ctx.stroke();
     }
     ctx.restore();
-
-    // 2. Primary Dense Diagonal Dual-Contrast Embossed HK721.COM Grid (-31°)
     ctx.save();
     ctx.translate(PW/2,PH/2);ctx.rotate(-0.54);
     ctx.textAlign='center';ctx.textBaseline='middle';
@@ -1218,8 +1243,6 @@ async function buildFreeWatermarkedPdf(J,D){
       }
     }
     ctx.restore();
-
-    // 3. Counter-Diagonal Interlocking Micro-Pattern (+26°) to defeat AI inpainting
     ctx.save();
     ctx.translate(PW/2,PH/2);ctx.rotate(0.45);
     ctx.textAlign='center';ctx.textBaseline='middle';
@@ -1233,12 +1256,9 @@ async function buildFreeWatermarkedPdf(J,D){
       }
     }
     ctx.restore();
-
-    // 4. Solid Security Header & Footer Ribbons (Wine Red + Light Sand)
     ctx.save();
     ctx.fillStyle='#7F011F';
-    ctx.fillRect(0,0,PW,24);
-    ctx.fillRect(0,PH-26,PW,26);
+    ctx.fillRect(0,0,PW,24);ctx.fillRect(0,PH-26,PW,26);
     ctx.fillStyle='#F5EBD0';
     ctx.font='700 11.5px "Inter",sans-serif';
     ctx.textAlign='center';ctx.textBaseline='middle';
@@ -1271,7 +1291,7 @@ async function buildFreeWatermarkedPdf(J,D){
     ctx.strokeRect(e.x+h,e.y+h,e.w-e.bw,e.h-e.bw);
   });
 
-  // Render Page 1 to flattened canvas
+  // Page 1
   const cv=document.createElement('canvas');cv.width=PW*SC;cv.height=PH*SC;
   const ctx=cv.getContext('2d');ctx.scale(SC,SC);
   drawBg(ctx,[[-70,-90,330,.4],[-70,850,170,.4],[-70,880,120,.5],[250,830,800,.5]]);
@@ -1285,15 +1305,10 @@ async function buildFreeWatermarkedPdf(J,D){
     ctx.restore();
   }else if(t===2){ctx.fillStyle=th.dark;ctx.fillRect(0,0,290,PH)}
   else if(t===3){ctx.fillStyle=th.dark;ctx.fillRect(0,0,PW,270)}
-
   const f=D.fr;
   if(f){
-    if(f.sh){
-      ctx.save();ctx.shadowColor='rgba(0,0,0,0.22)';ctx.shadowBlur=14;ctx.shadowOffsetY=6;
-      ctx.fillStyle='#fff';rRect(ctx,f.x,f.y,f.w,f.h,f.r);ctx.fill();ctx.restore();
-    }else{
-      ctx.fillStyle='#fff';rRect(ctx,f.x,f.y,f.w,f.h,f.r);ctx.fill();
-    }
+    if(f.sh){ctx.save();ctx.shadowColor='rgba(0,0,0,0.22)';ctx.shadowBlur=14;ctx.shadowOffsetY=6;ctx.fillStyle='#fff';rRect(ctx,f.x,f.y,f.w,f.h,f.r);ctx.fill();ctx.restore()}
+    else{ctx.fillStyle='#fff';rRect(ctx,f.x,f.y,f.w,f.h,f.r);ctx.fill()}
     const ix=f.x+f.b,iy=f.y+f.b,iw=f.w-2*f.b,ih=f.h-2*f.b,ir=Math.max(f.r-f.b,0);
     if(D.main){await drawPhoto(ctx,D.main,ix,iy,iw,ih,ir);stampPhotoLock(ctx,ix,iy,iw,ih,ir)}
     else{ctx.fillStyle=th.band;rRect(ctx,ix,iy,iw,ih,ir);ctx.fill()}
@@ -1309,16 +1324,15 @@ async function buildFreeWatermarkedPdf(J,D){
   applyStrictWatermark(ctx);
   doc.addImage(cv.toDataURL('image/jpeg',0.86),'JPEG',0,0,595.28,841.89,undefined,'FAST');
 
-  // Render Page 2+ Gallery Pages to flattened canvas with strict watermark
-  for(const pageCells of (D.photoPages||[])){
-    if(!pageCells.length)continue;
+  // Page 2
+  if(D.cells&&D.cells.length){
     doc.addPage();
     ctx.setTransform(SC,0,0,SC,0,0);
     drawBg(ctx,[[-70,-90,330,.4],[250,900,800,.5]]);
     drawDecs(ctx,D.dec2);drawBrds(ctx,D.brd2);
     if(t===2){ctx.fillStyle=th.dark;ctx.fillRect(0,0,26,PH)}
     else if(t===3){ctx.fillStyle=th.dark;ctx.fillRect(0,0,PW,26)}
-    for(const c of pageCells){
+    for(const c of D.cells){
       await drawPhoto(ctx,c,c.x,c.y,c.w,c.h,0);
       stampPhotoLock(ctx,c.x,c.y,c.w,c.h,0);
     }
@@ -1342,12 +1356,14 @@ const IC={
   eye:svg('<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'),
   eyeOff:svg('<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>'),
   plus:svg('<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>'),
+  minus:svg('<line x1="5" y1="12" x2="19" y2="12"/>'),
+  lock:svg('<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>'),
+  unlock:svg('<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/>'),
   trash:svg('<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>'),
   x:svg('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>'),
   crop:svg('<path d="M6.13 1L6 16a2 2 0 0 0 2 2h15"/><path d="M1 6.13L16 6a2 2 0 0 1 2 2v15"/>'),
   sun:svg('<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>','ic'),
   moon:svg('<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>','ic'),
-  img:svg('<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>'),
   sec:[
     svg('<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>','ic'),
     svg('<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>','ic'),
@@ -1361,7 +1377,7 @@ const IC={
 const WM_TILE_URI="url(\"data:image/svg+xml,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="260" height="180"><g transform="rotate(-28 130 90)"><line x1="-40" y1="30" x2="300" y2="30" stroke="#7F011F" stroke-opacity="0.10" stroke-width="1"/><line x1="-40" y1="150" x2="300" y2="150" stroke="#7F011F" stroke-opacity="0.10" stroke-width="1"/><text x="130" y="92" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-weight="700" font-size="24" fill="#7F011F" fill-opacity="0.22" stroke="#FFFFFF" stroke-opacity="0.35" stroke-width="1">HK721.COM</text></g></svg>')+"\")";
 function applyWmPattern(){document.querySelectorAll('.wm-live').forEach(el=>{el.style.backgroundImage=WM_TILE_URI})}
 
-/* UI Theme Toggle (Default = Light Wine Red + Light Sand) & Mobile Tab Switcher */
+/* UI Theme Toggle & Mobile Tab Switcher */
 (()=>{
   const btn=$('themeToggle');
   const isDark=()=>document.documentElement.dataset.theme==='dark';
@@ -1377,19 +1393,60 @@ function applyWmPattern(){document.querySelectorAll('.wm-live').forEach(el=>{el.
   });
 })();
 
+/* ===== Shared Admin Registry Sync (works with /admin on same domain) ===== */
+const ADMIN_USERS_KEY='hk721_admin_users_v1';
+const ADMIN_LOGS_KEY='hk721_admin_logs_v1';
+function getAdminUsers(){try{return JSON.parse(localStorage.getItem(ADMIN_USERS_KEY)||'[]')}catch(e){return[]}}
+function setAdminUsers(arr){try{localStorage.setItem(ADMIN_USERS_KEY,JSON.stringify(arr))}catch(e){}}
+function logAdminEvent(action,detail,amount=0){
+  try{
+    const logs=JSON.parse(localStorage.getItem(ADMIN_LOGS_KEY)||'[]');
+    logs.unshift({id:'ev_'+Date.now().toString(36),at:Date.now(),phone:user?user.phone:'Guest',name:user?user.name:'Guest',action,detail,amount});
+    localStorage.setItem(ADMIN_LOGS_KEY,JSON.stringify(logs.slice(0,200)));
+  }catch(e){}
+}
+function syncUserToAdmin(opts={}){
+  if(!user||!user.phone)return;
+  const list=getAdminUsers();
+  let rec=list.find(u=>u.phone===user.phone);
+  if(!rec){
+    rec={id:'u_'+Date.now().toString(36),name:user.name,phone:user.phone,plan:'free',credits:0,expiresAt:0,paidDownloads:0,freeDownloads:0,totalSpent:0,joinedAt:Date.now(),lastActive:Date.now()};
+    list.unshift(rec);
+  }
+  rec.name=user.name;
+  rec.plan=plan.type;
+  rec.credits=plan.credits||0;
+  rec.expiresAt=plan.expiresAt||0;
+  rec.lastActive=Date.now();
+  if(opts.paidDl)rec.paidDownloads=(rec.paidDownloads||0)+1;
+  if(opts.freeDl)rec.freeDownloads=(rec.freeDownloads||0)+1;
+  if(opts.spent)rec.totalSpent=(rec.totalSpent||0)+opts.spent;
+  setAdminUsers(list);
+}
+function pullAdminPlanOverride(){
+  if(!user||!user.phone)return;
+  const rec=getAdminUsers().find(u=>u.phone===user.phone);
+  if(rec&&rec.adminOverrideAt&&(!plan.syncedOverrideAt||rec.adminOverrideAt>plan.syncedOverrideAt)){
+    plan={type:rec.plan||'free',credits:rec.credits||0,expiresAt:rec.expiresAt||0,syncedOverrideAt:rec.adminOverrideAt};
+    savePlan();
+  }
+}
+
 /* ===== Account (Mobile OTP) + Minimal Profile + 2-Plan System (₹99 / ₹149) ===== */
 const USER_KEY='bd_user_v1';
 const PLAN_KEY='bd_plan_v1';
-let user=null; // {name, phone, pwd}
-let plan={type:'free',credits:0,expiresAt:0}; // type: 'free' | 'pack99' | 'pass149'
+let user=null;
+let plan={type:'free',credits:0,expiresAt:0};
 let pendingBuy=null;
 
 function loadAccountAndPlan(){
   try{user=JSON.parse(localStorage.getItem(USER_KEY)||'null')}catch(e){user=null}
   try{const p=JSON.parse(localStorage.getItem(PLAN_KEY)||'null');if(p&&p.type)plan=p}catch(e){}
+  pullAdminPlanOverride();
   normalizePlan();
   syncAccountUI();
   syncPlanUI();
+  if(user)syncUserToAdmin();
 }
 function saveUser(){try{if(user)localStorage.setItem(USER_KEY,JSON.stringify(user));else localStorage.removeItem(USER_KEY)}catch(e){}}
 function savePlan(){try{localStorage.setItem(PLAN_KEY,JSON.stringify(plan))}catch(e){}}
@@ -1439,47 +1496,31 @@ document.addEventListener('keydown',e=>{
 $('btnPlans').onclick=()=>openModal('plansModal');
 $('b_up').onclick=()=>openModal('plansModal');
 $('wmNotice').onclick=()=>openModal('plansModal');
-
-/* Account Button -> If logged out open OTP Login, if logged in open Minimal Profile */
-$('btnAccount').onclick=()=>{
-  if(!user){openAuthModal()}
-  else{openProfileModal()}
-};
+$('btnAccount').onclick=()=>{if(!user)openAuthModal();else openProfileModal()};
 
 function openAuthModal(){
   $('authStep1').hidden=false;$('authStep2').hidden=true;
   $('authMsg').textContent='';$('authMsg').className='status-txt';
   $('authOtp').value='';
-  openModal('authModal');
-  $('authPhone').focus();
+  openModal('authModal');$('authPhone').focus();
 }
 $('authPhone').oninput=e=>{e.target.value=e.target.value.replace(/\D/g,'').slice(0,10)};
 $('authOtp').oninput=e=>{e.target.value=e.target.value.replace(/\D/g,'').slice(0,6)};
 
 $('btnSendOtp').onclick=()=>{
-  const ph=$('authPhone').value.trim();
-  const m=$('authMsg');
-  if(!/^[6-9]\d{9}$/.test(ph)){
-    m.className='status-txt err';m.textContent='Please enter a valid 10-digit Indian mobile number.';return;
-  }
+  const ph=$('authPhone').value.trim(),m=$('authMsg');
+  if(!/^[6-9]\d{9}$/.test(ph)){m.className='status-txt err';m.textContent='Please enter a valid 10-digit Indian mobile number.';return}
   m.className='status-txt';m.textContent='OTP sent! Use 123456 in UI preview mode.';
   $('otpSentTxt').textContent='OTP sent to +91 '+ph+' (Demo: 123456)';
-  $('authStep1').hidden=true;$('authStep2').hidden=false;
-  $('authOtp').focus();
+  $('authStep1').hidden=true;$('authStep2').hidden=false;$('authOtp').focus();
 };
-$('btnEditPhone').onclick=()=>{
-  $('authStep2').hidden=true;$('authStep1').hidden=false;$('authMsg').textContent='';$('authPhone').focus();
-};
+$('btnEditPhone').onclick=()=>{$('authStep2').hidden=true;$('authStep1').hidden=false;$('authMsg').textContent='';$('authPhone').focus()};
 $('btnVerifyOtp').onclick=()=>{
-  const ph=$('authPhone').value.trim();
-  const otp=$('authOtp').value.trim();
-  const nm=$('authName').value.trim()||'User';
-  const m=$('authMsg');
-  if(otp.length!==6){
-    m.className='status-txt err';m.textContent='Please enter the 6-digit OTP (Demo: 123456).';return;
-  }
+  const ph=$('authPhone').value.trim(),otp=$('authOtp').value.trim(),nm=$('authName').value.trim()||'User',m=$('authMsg');
+  if(otp.length!==6){m.className='status-txt err';m.textContent='Please enter the 6-digit OTP (Demo: 123456).';return}
   user={name:nm,phone:'+91 '+ph,pwd:''};
-  saveUser();syncAccountUI();
+  saveUser();pullAdminPlanOverride();syncAccountUI();syncPlanUI();
+  syncUserToAdmin();logAdminEvent('OTP Login','Verified mobile number');
   closeModal('authModal');
   msg('Logged in as '+user.name);
   if(pendingBuy){const p=pendingBuy;pendingBuy=null;activatePlan(p)}
@@ -1495,16 +1536,12 @@ function openProfileModal(){
   $('profMsg').textContent='';$('profMsg').className='status-txt';
   openModal('profileModal');
 }
-$('btnTogglePwd').onclick=()=>{
-  const open=$('pwdBox').classList.toggle('open');
-  if(open)$('upPwd1').focus();
-};
+$('btnTogglePwd').onclick=()=>{if($('pwdBox').classList.toggle('open'))$('upPwd1').focus()};
 $('btnSaveName').onclick=()=>{
   if(!user)return;
-  const nm=$('upName').value.trim();
-  const m=$('profMsg');
+  const nm=$('upName').value.trim(),m=$('profMsg');
   if(!nm){m.className='status-txt err';m.textContent='Name cannot be empty.';return}
-  user.name=nm;saveUser();syncAccountUI();
+  user.name=nm;saveUser();syncAccountUI();syncUserToAdmin();
   m.className='status-txt';m.textContent='Name updated successfully.';
 };
 $('btnSavePwd').onclick=()=>{
@@ -1512,41 +1549,37 @@ $('btnSavePwd').onclick=()=>{
   const p1=$('upPwd1').value,p2=$('upPwd2').value,m=$('profMsg');
   if(p1.length<6){m.className='status-txt err';m.textContent='Password must be at least 6 characters.';return}
   if(p1!==p2){m.className='status-txt err';m.textContent='Passwords do not match.';return}
-  user.pwd=p1;saveUser();
-  $('upPwd1').value='';$('upPwd2').value='';
-  $('pwdBox').classList.remove('open');
+  user.pwd=p1;saveUser();$('upPwd1').value='';$('upPwd2').value='';$('pwdBox').classList.remove('open');
   m.className='status-txt';m.textContent='Password reset successfully.';
 };
-$('btnLogout').onclick=()=>{
-  user=null;saveUser();syncAccountUI();closeModal('profileModal');msg('Logged out.');
-};
+$('btnLogout').onclick=()=>{user=null;saveUser();syncAccountUI();closeModal('profileModal');msg('Logged out.')};
 
-/* Plan Selection (₹99 = 3 Downloads, ₹149 = 6 Months) */
+/* Plan Activation (₹99 = 3 Downloads, ₹149 = 6 Months) */
 function activatePlan(kind){
   if(!user){
-    pendingBuy=kind;
-    closeModal('plansModal');
-    openAuthModal();
-    $('authMsg').className='status-txt';
-    $('authMsg').textContent='Verify mobile OTP first to activate your plan.';
+    pendingBuy=kind;closeModal('plansModal');openAuthModal();
+    $('authMsg').className='status-txt';$('authMsg').textContent='Verify mobile OTP first to activate your plan.';
     return;
   }
+  let amt=0;
   if(kind==='pack99'){
-    plan={type:'pack99',credits:3,expiresAt:0};
-    msg('₹99 Pack activated (UI Preview) — 3 clean HD downloads unlocked.');
+    plan={type:'pack99',credits:3,expiresAt:0};amt=99;
+    msg('₹99 Pack activated — 3 clean HD downloads unlocked.');
+    logAdminEvent('Plan Activated','₹99 Pack (3 Downloads)',99);
   }else if(kind==='pass149'){
-    const sixMonths=Date.now()+180*24*60*60*1000;
-    plan={type:'pass149',credits:9999,expiresAt:sixMonths};
-    msg('₹149 6-Month Pass activated (UI Preview) — Unlimited clean HD downloads.');
+    plan={type:'pass149',credits:9999,expiresAt:Date.now()+180*24*60*60*1000};amt=149;
+    msg('₹149 6-Month Pass activated — Unlimited clean HD downloads.');
+    logAdminEvent('Plan Activated','₹149 Pass (6 Months)',149);
   }
-  savePlan();syncPlanUI();closeModal('plansModal');
+  savePlan();syncPlanUI();syncUserToAdmin({spent:amt});closeModal('plansModal');
 }
 document.querySelectorAll('[data-buy]').forEach(b=>b.onclick=()=>activatePlan(b.dataset.buy));
 $('btnResetFree').onclick=()=>{
   plan={type:'free',credits:0,expiresAt:0};
-  savePlan();syncPlanUI();closeModal('plansModal');
+  savePlan();syncPlanUI();syncUserToAdmin();closeModal('plansModal');
   msg('Switched to Free plan (Strict HK721.com watermark active).');
 };
+window.addEventListener('focus',()=>{pullAdminPlanOverride();syncPlanUI()});
 
 /* ===== Sections, 12 Templates, 24 Colours ===== */
 const SEC=[
@@ -1587,9 +1620,6 @@ const TH={
   magenta:['Magenta','#8C2468','#B26397','#FAF0F6','#F2DCEB','#E5BEDA'],
   charcoal:['Charcoal','#23252A','#636773','#F2F3F5','#E3E5E9','#CCCFD6']
 };
-
-/* Uniform Page 2+ Gallery Constants (exact 6-photo size: 2 cols x 3 rows) */
-const PER_PAGE=6,GAP=10,TILE_W=(694-GAP)/2,TILE_H=(983-2*GAP)/3,TILE_R=TILE_W/TILE_H;
 
 let custom=[],tpl=1,theme='wine',main=null,extra=[],dl=null;
 const msg=t=>{$('msg').textContent=t||''};
@@ -1773,7 +1803,8 @@ const browserDl={save:async({filename,data})=>{const u=URL.createObjectURL(data)
 dl=browserDl;
 if(window.claude&&claude.use){claude.use('downloads').then(d=>{if(d)dl=d}).catch(()=>{})}
 
-/* Photos: uniform 6-per-page gallery + crop editor */
+/* ===== Photos: Smart Justified-Rows Collage (Natural Ratio + Individual -/+ Size + Lock + Crop) ===== */
+const RT={'Free':null,'1:1':1,'3:4':.75,'4:5':.8,'9:16':9/16,'16:9':16/9};
 let pid=0,cur=null,dg=null,hp=null;
 const readImg=(f,m)=>new Promise(res=>{const r=new FileReader();r.onload=()=>{const i=new Image();i.onload=()=>{const k=Math.min(1,m/Math.max(i.width,i.height)),c=document.createElement('canvas');c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(i,0,0,c.width,c.height);res({src:c.toDataURL('image/jpeg',.93),iw:c.width,ih:c.height})};i.onerror=()=>res(null);i.src=r.result};r.readAsDataURL(f)});
 const readURL=b=>new Promise(r=>{const x=new FileReader();x.onload=()=>r(x.result);x.onerror=()=>r(null);x.readAsDataURL(b)});
@@ -1799,90 +1830,105 @@ const mk=async f=>{
     }catch(e){o=null}
   }
   if(!o){msg('Could not read this photo. Please choose a JPG or PNG.');return null}
-  return{id:++pid,src:o.src,orig:await origData(fb,o),iw:o.iw,ih:o.ih,c:{x:0,y:0,w:1,h:1}};
+  return{id:++pid,src:o.src,orig:await origData(fb,o),iw:o.iw,ih:o.ih,c:{x:0,y:0,w:1,h:1},sz:1,lock:false};
 };
 function defCrop(p,R,fy){const w=Math.min(1,R*p.ih/p.iw),h=Math.min(1,p.iw/(R*p.ih));p.c={x:(1-w)/2,y:(1-h)*fy,w,h}}
 function bg(el,p,w,h){const c=p.c,s=Math.max(w/(c.w*p.iw),h/(c.h*p.ih)),bw=p.iw*s,bh=p.ih*s;if(el.dataset.i!=p.id){el.style.backgroundImage='url('+p.src+')';el.dataset.i=p.id}el.style.backgroundSize=bw+'px '+bh+'px';el.style.backgroundPosition=(w/2-(c.x+c.w/2)*bw)+'px '+(h/2-(c.y+c.h/2)*bh)+'px'}
 function mv(i,d){const j=i+d;if(j<0||j>=extra.length)return;[extra[i],extra[j]]=[extra[j],extra[i]];renderPhotos()}
+function part(a,r){const t=a.reduce((x,y)=>x+y,0)/r,rows=[];let cur=[],s=0;a.forEach((v,i)=>{if(cur.length&&rows.length<r-1&&s+v/2>t){rows.push(cur);cur=[];s=0}cur.push(i);s+=v});rows.push(cur);return rows}
 
-function makePhotoSheet(pageNum){
-  const wrap=document.createElement('div');
-  wrap.innerHTML=`<div class="page-label">${IC.img}Page ${pageNum}</div>
-  <div class="pw"><div class="page photo-sheet" data-t="${tpl}">
-    <div class="s2"></div><div class="s3"></div>
-    <div class="dec p4"></div><div class="dec p5"></div><div class="dec p6"></div>
-    <div class="dec-b p7o"></div><div class="dec-b p7i"></div>
-    <div class="dec p8a"></div><div class="dec p8b"></div><div class="dec p8c"></div>
-    <div class="dec p9"></div>
-    <div class="dec p10"></div>
-    <div class="dec p11a"></div><div class="dec p11b"></div>
-    <div class="dec p12a"></div><div class="dec p12b"></div>
-    <div class="blob t1d" style="left:-70px;top:-90px;width:330px;height:330px;opacity:.4"></div>
-    <div class="blob t1d" style="left:250px;top:900px;width:800px;height:800px;opacity:.5"></div>
-    <div class="col"></div>
-    <div class="ft"></div>
-    <div class="wm-live"></div>
-    <div class="wm-bar-live">FREE PREVIEW • HK721.COM • UPGRADE TO REMOVE WATERMARK</div>
-  </div></div>`;
-  return wrap;
-}
-
+/* Justified-rows collage: every photo keeps its own ratio & individual sz (smaller/bigger) */
 function layoutExtras(){
-  const p2=$('p2wrap'),n=extra.length;
-  p2.textContent='';
-  if(!n||hide2){p2.style.display='none';return}
-  p2.style.display='';
-  const pages=Math.ceil(n/PER_PAGE);
-  for(let pg=0;pg<pages;pg++){
-    const blk=makePhotoSheet(pg+2);
-    const col=blk.querySelector('.col');
-    const chunk=extra.slice(pg*PER_PAGE,(pg+1)*PER_PAGE);
-    chunk.forEach((p,idx)=>{
-      const cIdx=idx%2,rIdx=Math.floor(idx/2);
-      const d=document.createElement('div');
-      d.style.left=(cIdx*(TILE_W+GAP))+'px';
-      d.style.top=(rIdx*(TILE_H+GAP))+'px';
-      d.style.width=TILE_W+'px';
-      d.style.height=TILE_H+'px';
-      bg(d,p,TILE_W,TILE_H);
-      col.appendChild(d);
+  const n=extra.length;if(!n)return;
+  const W=694,H=983,G=8;
+  const A=extra.map(p=>p.c.w*p.iw/(p.c.h*p.ih));
+  const a=extra.map((p,i)=>A[i]*(p.sz||1));
+  let best=null;
+  for(let r=1;r<=n;r++){
+    const L=[];let tot=0;
+    part(a,r).forEach(ix=>{
+      const mx=Math.max(...ix.map(i=>extra[i].sz||1));
+      const sa=ix.reduce((s,i)=>s+A[i]*(extra[i].sz||1)/mx,0);
+      const h=(W-G*(ix.length-1))/sa;
+      L.push({ix,h,mx});tot+=h;
     });
-    p2.appendChild(blk);
+    tot+=G*(L.length-1);
+    const k=Math.min(1,H/tot),area=W*k*tot*k;
+    if(!best||area>best.area+1)best={L,tot,k,area};
   }
-  applyTheme();
-  applyTpl();
-  applyWmPattern();
+  const{L,tot,k}=best,ox=W*(1-k)/2,cs=$('col').children;
+  let ry=0;const oy=(H-tot*k)/2;
+  L.forEach(({ix,h,mx})=>{
+    let x=0;
+    ix.forEach(i=>{
+      const p=extra[i],sz=p.sz||1,hh=h*sz/mx,ww=A[i]*hh,d=cs[i];
+      if(!d)return;
+      const w=ww*k,ht=hh*k;
+      d.style.left=(ox+x*k)+'px';
+      d.style.top=(oy+(ry+(h-hh)/2)*k)+'px';
+      d.style.width=w+'px';
+      d.style.height=ht+'px';
+      bg(d,p,w,ht);
+      x+=ww+G;
+    });
+    ry+=h+G;
+  });
 }
 
 function renderPhotos(skipSave){
-  const m=$('ph1'),n=extra.length;
+  const m=$('ph1'),col=$('col'),n=extra.length;
   if(main)bg(m,main,m.clientWidth,m.clientHeight);else{m.style.backgroundImage='none';delete m.dataset.i}
   $('phx').style.display=main?'none':'';
+  $('p2wrap').style.display=n&&!hide2?'':'none';
   m.style.visibility=hideMain?'hidden':'';
+  col.textContent='';
+  extra.forEach(p=>{
+    if(!p.sz)p.sz=1;
+    if(p.lock===undefined)p.lock=false;
+    col.appendChild(document.createElement('div'));
+  });
   layoutExtras();
   const t=$('th');t.textContent='';
   extra.forEach((p,i)=>{
     const d=document.createElement('div');d.className='tb';
     const im=document.createElement('div');im.className='ti';im.style.backgroundImage='url('+p.src+')';
-    const bs=document.createElement('div');bs.className='tbs';
+    if(Math.abs((p.sz||1)-1)>0.03){
+      const tag=document.createElement('span');tag.className='ti-sz';
+      tag.textContent=Math.round((p.sz||1)*100)+'%';im.appendChild(tag);
+    }
+    const r1=document.createElement('div');r1.className='tbs-r1';
     [
       [IC.left,()=>mv(i,-1),'Move left',i===0],
-      [IC.crop,()=>openCrop(i),'Crop photo',false],
-      [IC.right,()=>mv(i,1),'Move right',i===n-1],
-      [IC.x,()=>{extra.splice(i,1);renderPhotos()},'Remove photo',false]
+      [IC.crop+'Crop',()=>openCrop(i),'Crop photo',!!p.lock],
+      [IC.right,()=>mv(i,1),'Move right',i===n-1]
     ].forEach(([l,f,tip,dis])=>{
       const b=document.createElement('button');b.type='button';b.innerHTML=l;
-      b.title=tip;b.setAttribute('aria-label',tip);b.disabled=dis;b.onclick=f;bs.appendChild(b);
+      b.title=tip;b.setAttribute('aria-label',tip);b.disabled=dis;b.onclick=f;r1.appendChild(b);
     });
-    d.append(im,bs);t.appendChild(d);
+    const r2=document.createElement('div');r2.className='tbs-r2';
+    [
+      [IC.minus,()=>{p.sz=clamp((p.sz||1)/1.18,.4,2.5);renderPhotos()},'Make smaller',!!p.lock,''],
+      [p.lock?IC.lock:IC.unlock,()=>{p.lock=!p.lock;renderPhotos()},p.lock?'Unlock photo':'Lock size & crop',false,p.lock?'locked':''],
+      [IC.plus,()=>{p.sz=clamp((p.sz||1)*1.18,.4,2.5);renderPhotos()},'Make bigger',!!p.lock,''],
+      [IC.x,()=>{extra.splice(i,1);renderPhotos()},'Remove photo',false,'del-b']
+    ].forEach(([l,f,tip,dis,cls])=>{
+      const b=document.createElement('button');b.type='button';b.innerHTML=l;
+      if(cls)b.className=cls;
+      b.title=tip;b.setAttribute('aria-label',tip);b.disabled=dis;b.onclick=f;r2.appendChild(b);
+    });
+    d.append(im,r1,r2);t.appendChild(d);
   });
   $('cm').style.display=main?'':'none';
   $('clr').style.display=n?'':'none';
+  $('rs').style.display=n>1?'':'none';
+  applyTheme();applyTpl();applyWmPattern();
   scale();
   if(!skipSave)savePh();
 }
 
-/* Crop Editor */
+/* Crop Editor (Free + per-photo ratios for Page 2, fixed frame ratio for Main photo) */
+function chips(box,ks,cb){ks.forEach(k=>{const b=document.createElement('button');b.type='button';b.className='sm chip';b.textContent=k;b.dataset.k=k;b.onclick=()=>cb(k);box.appendChild(b)})}
+function mark(box,k){[...box.children].forEach(b=>b.classList.toggle('on',b.dataset.k===k))}
 function drawR(){const r=cur.r,b=$('cx').style;b.left=r.x+'px';b.top=r.y+'px';b.width=r.w+'px';b.height=r.h+'px'}
 function commit(){
   const{p,r,dw,dh}=cur;
@@ -1891,16 +1937,20 @@ function commit(){
   else layoutExtras();
   savePh();
 }
+function fitRatio(){
+  const r=cur.r,R=cur.R;let w=r.w,h=r.h;
+  if(w/h>R)w=h*R;else h=w/R;
+  const cx=r.x+r.w/2,cy=r.y+r.h/2;
+  cur.r={x:clamp(cx-w/2,0,cur.dw-w),y:clamp(cy-h/2,0,cur.dh-h),w,h};
+}
 function openCrop(t){
-  const p=t==='m'?main:extra[t];if(!p)return;
+  const p=t==='m'?main:extra[t];if(!p||(t!=='m'&&p.lock))return;
   const k=Math.min(Math.min(340,innerWidth-70)/p.iw,innerHeight*.5/p.ih),dw=p.iw*k,dh=p.ih*k,m=$('ph1');
-  const R=t==='m'?m.clientWidth/m.clientHeight:TILE_R;
-  let w=p.c.w*dw,h=p.c.h*dh;
-  if(Math.abs(w/h-R)>0.02){if(w/h>R)w=h*R;else h=w/R}
-  const cx=(p.c.x+p.c.w/2)*dw,cy=(p.c.y+p.c.h/2)*dh;
-  cur={p,t,dw,dh,R,r:{x:clamp(cx-w/2,0,dw-w),y:clamp(cy-h/2,0,dh-h),w,h}};
+  cur={p,t,dw,dh,R:t==='m'?m.clientWidth/m.clientHeight:null,r:{x:p.c.x*dw,y:p.c.y*dh,w:p.c.w*dw,h:p.c.h*dh}};
   const s=$('cs');s.style.width=dw+'px';s.style.height=dh+'px';s.style.backgroundImage='url('+p.src+')';
-  drawR();$('cr').hidden=false;
+  $('cc').style.display=t==='m'?'none':'';
+  if(!$('cc').children.length)chips($('cc'),Object.keys(RT),q=>{if(!cur)return;cur.R=RT[q]||null;mark($('cc'),q);if(cur.R)fitRatio();drawR();commit()});
+  mark($('cc'),'Free');drawR();$('cr').hidden=false;
 }
 function pd(e,mode){e.preventDefault();e.stopPropagation();dg={mode,x:e.clientX,y:e.clientY,r:{...cur.r}};e.target.setPointerCapture(e.pointerId)}
 $('cx').onpointerdown=e=>{if(e.target===$('cx'))pd(e,'m')};
@@ -1922,7 +1972,8 @@ window.addEventListener('pointermove',e=>{
 window.addEventListener('pointerup',()=>{dg=null});
 $('crs').onclick=()=>{
   if(!cur)return;const p=cur.p;
-  defCrop(p,cur.R,cur.t==='m'?.1:.25);
+  if(cur.t==='m')defCrop(p,cur.R,.1);
+  else{p.c={x:0,y:0,w:1,h:1};cur.R=null;mark($('cc'),'Free')}
   cur.r={x:p.c.x*cur.dw,y:p.c.y*cur.dh,w:p.c.w*cur.dw,h:p.c.h*cur.dh};
   drawR();commit();
 };
@@ -1931,9 +1982,9 @@ $('pm').onchange=async e=>{const f=e.target.files[0];if(f){const p=await mk(f);i
 $('cm').onclick=()=>openCrop('m');
 $('pe').onchange=async e=>{
   const r=(await Promise.all([...e.target.files].map(mk))).filter(Boolean);
-  r.forEach(p=>defCrop(p,TILE_R,.25));
   extra.push(...r);e.target.value='';renderPhotos();
 };
+$('rs').onclick=()=>{extra.forEach(p=>{if(!p.lock){p.sz=1;p.c={x:0,y:0,w:1,h:1}}});renderPhotos()};
 $('clr').onclick=()=>{extra=[];renderPhotos()};
 
 /* Collector for both Clean Vector PDF & Strict Flattened Free PDF */
@@ -1979,36 +2030,18 @@ function collect(){
     s.querySelectorAll('.v').forEach(e=>grab(e,'barlow',v[1],0));
   });
   const pick=p=>$('pq').value==='s'?p.src:(p.orig||p.src);
-  const photoPages=[];
-  let dec2=[],brd2=[];
-  if(!hide2&&extra.length){
-    const firstPhotoSheet=document.querySelector('.photo-sheet');
-    if(firstPhotoSheet){
-      dec2=[...firstPhotoSheet.querySelectorAll('.dec')].filter(e=>getComputedStyle(e).display!=='none').map(e=>({
-        x:e.offsetLeft,y:e.offsetTop,w:e.offsetWidth,h:e.offsetHeight,c:rgb2hex(getComputedStyle(e).backgroundColor)
-      }));
-      brd2=[...firstPhotoSheet.querySelectorAll('.dec-b')].filter(e=>getComputedStyle(e).display!=='none').map(e=>{
-        const cs=getComputedStyle(e);
-        return{x:e.offsetLeft,y:e.offsetTop,w:e.offsetWidth,h:e.offsetHeight,c:rgb2hex(cs.borderTopColor),bw:parseFloat(cs.borderTopWidth)||1};
-      });
-    }
-    const pages=Math.ceil(extra.length/PER_PAGE);
-    for(let pg=0;pg<pages;pg++){
-      const chunk=extra.slice(pg*PER_PAGE,(pg+1)*PER_PAGE);
-      photoPages.push(chunk.map((p,idx)=>{
-        const cIdx=idx%2,rIdx=Math.floor(idx/2);
-        return{img:pick(p),iw:p.iw,ih:p.ih,c:p.c,x:50+cIdx*(TILE_W+GAP),y:70+rIdx*(TILE_H+GAP),w:TILE_W,h:TILE_H};
-      }));
-    }
-  }
+  const cells=hide2?[]:[...$('col').children].map((d,i)=>{
+    const p=extra[i];if(!p)return null;
+    return{img:pick(p),iw:p.iw,ih:p.ih,c:p.c,x:50+parseFloat(d.style.left),y:70+parseFloat(d.style.top),w:parseFloat(d.style.width),h:parseFloat(d.style.height)};
+  }).filter(Boolean);
   const main_=main&&!hideMain?{img:pick(main),iw:main.iw,ih:main.ih,c:main.c}:null;
   scale();
   return{
     tpl,fr:hideMain?null:fr,
     dec1:decs('#sheet1 .dec'),brd1:brds('#sheet1 .dec-b'),
-    dec2,brd2,
+    dec2:decs('#sheet2 .dec'),brd2:brds('#sheet2 .dec-b'),
     th:{dark:v[1],mid:v[2],bg:v[3],band:v[4],blob:v[5]},
-    main:main_,t1,photoPages
+    main:main_,t1,cells
   };
 }
 async function exportPdf(){
@@ -2030,6 +2063,8 @@ async function exportPdf(){
       plan.credits=Math.max(0,plan.credits-1);
       savePlan();syncPlanUI();
     }
+    syncUserToAdmin(paid?{paidDl:1}:{freeDl:1});
+    logAdminEvent(paid?'HD PDF Download':'Free PDF Download',base+'.pdf');
     msg((paid?'Clean HD PDF saved':'Free PDF saved with HK721.com watermark')+' ('+(blob.size/1048576).toFixed(1)+' MB).');
   }catch(e){msg(e&&e.code==='declined'?'Download cancelled.':'Could not build the PDF: '+((e&&e.message)||'unknown error'))}
   finally{btn.disabled=false}
@@ -2130,7 +2165,9 @@ async function loadPhotosFor(id){
     const d=await idbGet(phKey(id));
     if(d){
       if(d.main)main=d.main;
-      if(Array.isArray(d.extra))extra=d.extra;
+      if(Array.isArray(d.extra)){
+        extra=d.extra.map(p=>({...p,sz:p.sz||1,lock:!!p.lock,c:p.c||{x:0,y:0,w:1,h:1}}));
+      }
       pid=Math.max(pid,d.pid||0,main&&main.id||0,...extra.map(p=>p.id||0));
     }
   }catch(e){}
@@ -2269,10 +2306,7 @@ addEventListener('pagehide',()=>{save();flushPh()});
   if(migratedLegacyPhotos){
     try{
       const oldPh=await idbGet('photos');
-      if(oldPh){
-        if(Array.isArray(oldPh.extra))oldPh.extra.forEach(p=>{if(!p.c)defCrop(p,TILE_R,.25)});
-        await idbSet(phKey('p1'),oldPh);
-      }
+      if(oldPh)await idbSet(phKey('p1'),oldPh);
     }catch(e){}
   }
   await loadPhotosFor(store.activeId);
