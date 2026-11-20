@@ -954,10 +954,12 @@ body[data-plan="free"] .wm-bar-live{display:block}
 
 <div class="bar"><div class="in">
   <input type="text" id="fname" placeholder="File name (optional)" aria-label="PDF file name" autocomplete="off">
-  <select id="pq" aria-label="Photo quality in PDF">
-    <option value="o">Original photo quality</option>
-    <option value="s">Smaller file</option>
+    <select id="pq" aria-label="Photo quality in PDF">
+    <option value="o">Original size (100%)</option>
+    <option value="h">Half size (1/2)</option>
+    <option value="t">1/3rd size (Compact)</option>
   </select>
+
   <button type="button" class="up-btn" id="b_up">
     <svg class="ic ic-sm" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
     Plans (₹99 / ₹149)
@@ -1997,7 +1999,29 @@ function rast(t,cs,fs,c,l,f,up){
   x.font=font;x.fillStyle=c;x.textBaseline='alphabetic';x.fillText(T,0,l.h*S*AR[f]);
   return{img:cv.toDataURL('image/png'),x:l.x,y:l.top,w:w/S,h:cv.height/S};
 }
-function collect(){
+async function resizeForPdf(p,mode){
+  const base=p.orig||p.src;
+  if(mode==='o')return base;
+  const target=mode==='h'?0.50:0.33;
+  const dimK=mode==='h'?0.72:0.56;
+  const q1=mode==='h'?0.80:0.66;
+  const im=await new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=base});
+  if(!im)return p.src;
+  const k=Math.min(1,Math.max(dimK,400/Math.max(im.width,im.height)));
+  const cv=document.createElement('canvas');
+  cv.width=Math.round(im.width*k);
+  cv.height=Math.round(im.height*k);
+  const x=cv.getContext('2d');
+  x.fillStyle='#fff';x.fillRect(0,0,cv.width,cv.height);
+  x.drawImage(im,0,0,cv.width,cv.height);
+  let out=cv.toDataURL('image/jpeg',q1);
+  if(out.length>base.length*target*1.12){
+    out=cv.toDataURL('image/jpeg',Math.max(0.35,q1*0.68));
+  }
+  return out.length<base.length?out:base;
+}
+async function collect(){
+  
   document.querySelectorAll('.page').forEach(p=>p.style.transform='none');
   const pr=$('sheet1').getBoundingClientRect(),v=TH[theme]||TH.wine,t1=[];
   const decs=q=>[...document.querySelectorAll(q)].filter(e=>getComputedStyle(e).display!=='none').map(e=>({
@@ -2029,7 +2053,7 @@ function collect(){
     s.querySelectorAll('.l').forEach(e=>grab(e,'barlowi',v[2],0));
     s.querySelectorAll('.v').forEach(e=>grab(e,'barlow',v[1],0));
   });
-  const pick=p=>$('pq').value==='s'?p.src:(p.orig||p.src);
+    const pick=p=>$('pq').value==='s'?p.src:(p.orig||p.src);
   const cells=hide2?[]:[...$('col').children].map((d,i)=>{
     const p=extra[i];if(!p)return null;
     return{img:pick(p),iw:p.iw,ih:p.ih,c:p.c,x:50+parseFloat(d.style.left),y:70+parseFloat(d.style.top),w:parseFloat(d.style.width),h:parseFloat(d.style.height)};
@@ -2053,7 +2077,7 @@ async function exportPdf(){
     await new Promise(r=>setTimeout(r,40));
     await document.fonts.ready;
     const D=collect();
-    const doc=paid
+
       ? buildPdf(window.jspdf.jsPDF,D,window.FONTS)
       : await buildFreeWatermarkedPdf(window.jspdf.jsPDF,D);
     const blob=doc.output('blob');
