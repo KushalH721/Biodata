@@ -2077,7 +2077,7 @@ async function exportPdf(){
     await new Promise(r=>setTimeout(r,40));
     await document.fonts.ready;
     const D=collect();
-
+const doc=paid
       ? buildPdf(window.jspdf.jsPDF,D,window.FONTS)
       : await buildFreeWatermarkedPdf(window.jspdf.jsPDF,D);
     const blob=doc.output('blob');
