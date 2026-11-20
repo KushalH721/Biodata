@@ -1,1 +1,608 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>HK721 Admin — Marriage Bio-Data Maker</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --ui:#F5EBD0;
+  --fg:#2C0610;
+  --card:#FBF6E8;
+  --card-sub:#F2E5C3;
+  --line:#DFCFA7;
+  --line-hover:#C4AB79;
+  --acc:#7F011F;
+  --acc-soft:rgba(127,1,31,.09);
+  --accfg:#F5EBD0;
+  --mut:#73424E;
+  --ok:#1E6B45;
+  --ok-soft:rgba(30,107,69,.12);
+  --warn:#9A5B00;
+  --warn-soft:rgba(154,91,0,.12);
+  --danger:#A50E2A;
+  --danger-soft:rgba(165,14,42,.10);
+  --radius:14px;
+  --radius-sm:9px;
+  --shadow:0 6px 24px rgba(55,6,18,.10);
+}
+:root[data-theme="dark"]{
+  --ui:#160509;
+  --fg:#F5EBD0;
+  --card:#210910;
+  --card-sub:#2B0D15;
+  --line:#441824;
+  --line-hover:#642536;
+  --acc:#F5EBD0;
+  --acc-soft:rgba(245,235,208,.12);
+  --accfg:#7F011F;
+  --mut:#C7B194;
+  --ok:#6CE0A5;
+  --ok-soft:rgba(108,224,165,.14);
+  --warn:#F6C46B;
+  --warn-soft:rgba(246,196,107,.14);
+  --danger:#FF788F;
+  --danger-soft:rgba(255,120,143,.14);
+  --shadow:0 12px 32px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--ui);color:var(--fg);
+  font:14px/1.45 "Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  -webkit-font-smoothing:antialiased;min-height:100vh;
+}
+.ic{width:16px;height:16px;display:inline-block;vertical-align:middle;flex:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;fill:none}
+.ic-sm{width:14px;height:14px}
 
+/* Login Screen */
+#loginView{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
+  background:radial-gradient(circle at top right, rgba(127,1,31,.14), transparent 55%), var(--ui);
+}
+#loginView[hidden]{display:none}
+.login-card{
+  width:100%;max-width:390px;background:var(--card);border:1px solid var(--line);
+  border-radius:18px;padding:26px 24px;box-shadow:var(--shadow);
+}
+.login-brand{display:flex;align-items:center;gap:11px;margin-bottom:18px}
+.login-badge{
+  width:42px;height:42px;border-radius:12px;background:#7F011F;color:#F5EBD0;
+  display:grid;place-items:center;font-weight:700;font-size:15px;letter-spacing:.03em;flex:none;
+}
+.login-brand h1{margin:0;font-size:17px;font-weight:700}
+.login-brand p{margin:2px 0 0;font-size:12px;color:var(--mut)}
+label{display:block;font-size:12px;font-weight:600;color:var(--mut);margin:12px 0 5px}
+input[type=text],input[type=tel],input[type=password],select{
+  width:100%;height:40px;padding:0 12px;font:inherit;font-size:13.5px;
+  border:1px solid var(--line);border-radius:var(--radius-sm);
+  background:var(--card-sub);color:var(--fg);
+  transition:border-color .15s,box-shadow .15s,background .15s;
+}
+input:focus,select:focus{outline:none;border-color:var(--acc);background:var(--card);box-shadow:0 0 0 3px var(--acc-soft)}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+  height:40px;padding:0 15px;border-radius:10px;
+  font:inherit;font-size:13px;font-weight:600;cursor:pointer;
+  border:1px solid var(--line);background:var(--card);color:var(--fg);
+  text-decoration:none;white-space:nowrap;
+  transition:filter .15s,background .15s,border-color .15s;
+}
+.btn:hover{background:var(--card-sub);border-color:var(--line-hover)}
+.btn.primary{background:var(--acc);color:var(--accfg);border-color:var(--acc)}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.sm{height:32px;padding:0 10px;font-size:12px;border-radius:8px}
+.btn.danger{color:var(--danger)}
+.btn.danger:hover{background:var(--danger-soft);border-color:color-mix(in srgb,var(--danger) 40%,transparent)}
+.err-txt{color:var(--danger);font-size:12.5px;font-weight:500;margin-top:10px;min-height:18px}
+
+/* Dashboard Header */
+#dashView[hidden]{display:none}
+header{
+  position:sticky;top:0;z-index:30;background:#7F011F;color:#F5EBD0;
+  border-bottom:1px solid rgba(245,235,208,.18);
+  box-shadow:0 2px 12px rgba(45,4,14,.18);
+}
+.hdr-in{
+  max-width:1280px;margin:auto;min-height:60px;padding:8px 18px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+}
+.h-left{display:flex;align-items:center;gap:10px}
+.h-mark{
+  width:34px;height:34px;border-radius:10px;background:rgba(245,235,208,.14);
+  border:1px solid rgba(245,235,208,.24);display:grid;place-items:center;font-weight:700;font-size:12px;
+}
+.h-title{font-size:15px;font-weight:700;margin:0}
+.h-sub{font-size:11.5px;color:rgba(245,235,208,.75);margin:1px 0 0}
+.h-acts{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.h-btn{
+  display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px;
+  border-radius:9px;border:1px solid rgba(245,235,208,.26);
+  background:rgba(245,235,208,.12);color:#F5EBD0;
+  font:inherit;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;
+}
+.h-btn:hover{background:rgba(245,235,208,.22)}
+.h-btn.sand{background:#F5EBD0;color:#7F011F;border-color:#F5EBD0}
+.h-btn.sand:hover{background:#fff}
+
+/* Main Container */
+main{max-width:1280px;margin:auto;padding:20px 18px 40px}
+
+/* Info Banner */
+.notice{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  background:var(--card);border:1px solid var(--line);border-left:4px solid #7F011F;
+  border-radius:12px;padding:11px 14px;margin-bottom:18px;font-size:12.5px;color:var(--mut);
+}
+.notice b{color:var(--fg)}
+
+/* KPI Grid */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(185px,1fr));gap:12px;margin-bottom:20px}
+.kpi{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:15px 16px;box-shadow:0 1px 3px rgba(60,8,20,.05);
+}
+.kpi .kl{font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--mut)}
+.kpi .kv{font-size:26px;font-weight:700;margin:6px 0 2px;letter-spacing:-.02em;color:var(--fg)}
+.kpi .ks{font-size:11.5px;color:var(--mut)}
+.kpi.hi{background:#7F011F;border-color:#7F011F;color:#F5EBD0}
+.kpi.hi .kl,.kpi.hi .ks{color:rgba(245,235,208,.8)}
+.kpi.hi .kv{color:#F5EBD0}
+
+/* Panel Cards */
+.panel{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:16px;margin-bottom:18px;box-shadow:0 1px 3px rgba(60,8,20,.05);
+}
+.panel-head{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  flex-wrap:wrap;margin-bottom:14px;
+}
+.panel-head h2{margin:0;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--acc)}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.toolbar input{width:220px;height:34px;font-size:13px}
+.pills{display:flex;gap:5px;flex-wrap:wrap}
+.pill{
+  height:32px;padding:0 11px;border-radius:999px;border:1px solid var(--line);
+  background:var(--card-sub);color:var(--fg);font:inherit;font-size:12px;font-weight:600;cursor:pointer;
+}
+.pill.on{background:var(--acc);color:var(--accfg);border-color:var(--acc)}
+
+/* Table */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:11px 10px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--mut);white-space:nowrap}
+tbody tr:hover{background:color-mix(in srgb,var(--card-sub) 55%,transparent)}
+.u-name{font-weight:600;color:var(--fg)}
+.u-ph{font-size:12px;color:var(--mut);margin-top:2px}
+.tag{
+  display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;
+  font-size:11.5px;font-weight:700;white-space:nowrap;
+}
+.tag.p149{background:#7F011F;color:#F5EBD0}
+.tag.p99{background:var(--ok-soft);color:var(--ok)}
+.tag.free{background:var(--card-sub);color:var(--mut);border:1px solid var(--line)}
+.act-g{display:flex;gap:5px;flex-wrap:wrap}
+.empty{text-align:center;padding:28px 14px;color:var(--mut);font-size:13px}
+
+/* Logs List */
+.log-list{display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto}
+.log-row{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+  padding:9px 12px;border-radius:10px;background:var(--card-sub);border:1px solid var(--line);font-size:12.5px;
+}
+.log-row b{color:var(--fg)}
+.log-time{font-size:11.5px;color:var(--mut)}
+
+/* Modal */
+.modal-bg{
+  position:fixed;inset:0;z-index:60;background:rgba(28,3,10,.68);backdrop-filter:blur(4px);
+  display:flex;align-items:center;justify-content:center;padding:16px;
+}
+.modal-bg[hidden]{display:none}
+.modal{
+  width:100%;max-width:400px;background:var(--card);border:1px solid var(--line);
+  border-radius:16px;padding:20px;box-shadow:var(--shadow);
+}
+.m-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.m-head h3{margin:0;font-size:16px;font-weight:700}
+
+@media(max-width:720px){
+  .toolbar input{width:100%}
+  .kpis{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== Admin Login View ===== -->
+<div id="loginView">
+  <form class="login-card" id="loginForm" autocomplete="off">
+    <div class="login-brand">
+      <div class="login-badge">HK</div>
+      <div>
+        <h1>HK721 Admin Panel</h1>
+        <p>123.hk721.com/admin • Paid Users &amp; Analytics</p>
+      </div>
+    </div>
+    <label for="admId">Admin ID</label>
+    <input type="text" id="admId" placeholder="Enter Admin ID" required autofocus>
+    <label for="admPass">Password</label>
+    <input type="password" id="admPass" placeholder="Enter Password" required>
+    <button type="submit" class="btn primary" style="width:100%;margin-top:16px">Login to Dashboard</button>
+    <div class="err-txt" id="loginErr"></div>
+    <div style="margin-top:10px;text-align:center">
+      <a href="/" style="font-size:12px;color:var(--mut);text-decoration:none">← Back to Bio-Data Maker</a>
+    </div>
+  </form>
+</div>
+
+<!-- ===== Admin Dashboard View ===== -->
+<div id="dashView" hidden>
+  <header>
+    <div class="hdr-in">
+      <div class="h-left">
+        <div class="h-mark">HK</div>
+        <div>
+          <div class="h-title">HK721 Bio-Data Admin</div>
+          <div class="h-sub">123.hk721.com/admin • Plan &amp; Revenue Tracker</div>
+        </div>
+      </div>
+      <div class="h-acts">
+        <button type="button" class="h-btn sand" id="btnAddUser">+ Add Paid User</button>
+        <button type="button" class="h-btn" id="btnExportCsv">Export CSV</button>
+        <button type="button" class="h-btn" id="btnDemoToggle">Load Demo Users</button>
+        <a href="/" class="h-btn">Open App</a>
+        <button type="button" class="h-btn" id="btnTheme" title="Toggle Theme">◐</button>
+        <button type="button" class="h-btn" id="btnLogout">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="notice">
+      <div><b>Live Local Sync Active:</b> Users logging in &amp; buying ₹99 / ₹149 plans on <b>123.hk721.com</b> appear here automatically. Connect Supabase/Firebase later for multi-device global tracking.</div>
+      <button type="button" class="btn sm" id="btnRefresh">Refresh</button>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="kpis">
+      <div class="kpi hi">
+        <div class="kl">Active Paid Users</div>
+        <div class="kv" id="kPaid">0</div>
+        <div class="ks" id="kPaidSub">₹99 + ₹149 active plans</div>
+      </div>
+      <div class="kpi">
+        <div class="kl">Total Revenue</div>
+        <div class="kv" id="kRev">₹0</div>
+        <div class="ks">From ₹99 &amp; ₹149 plans</div>
+      </div>
+      <div class="kpi">
+        <div class="kl">₹99 Pack (3 DL)</div>
+        <div class="kv" id="k99">0</div>
+        <div class="ks">Active 3-time users</div>
+      </div>
+      <div class="kpi">
+        <div class="kl">₹149 Pass (6 Months)</div>
+        <div class="kv" id="k149">0</div>
+        <div class="ks">Active 6-month users</div>
+      </div>
+      <div class="kpi">
+        <div class="kl">Total Registered</div>
+        <div class="kv" id="kTotal">0</div>
+        <div class="ks" id="kFreeSub">0 free users</div>
+      </div>
+      <div class="kpi">
+        <div class="kl">PDF Downloads</div>
+        <div class="kv" id="kDl">0</div>
+        <div class="ks" id="kDlSub">0 HD • 0 Free</div>
+      </div>
+    </div>
+
+    <!-- Users & Paid Plans Table -->
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Users &amp; Plan Status</h2>
+        <div class="toolbar">
+          <div class="pills" id="filterPills">
+            <button type="button" class="pill on" data-f="all">All</button>
+            <button type="button" class="pill" data-f="paid">Paid Only</button>
+            <button type="button" class="pill" data-f="pack99">₹99 Pack</button>
+            <button type="button" class="pill" data-f="pass149">₹149 (6M)</button>
+            <button type="button" class="pill" data-f="free">Free</button>
+          </div>
+          <input type="text" id="qSearch" placeholder="Search name or mobile…">
+        </div>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Plan</th>
+              <th>Remaining / Validity</th>
+              <th>Downloads</th>
+              <th>Spent</th>
+              <th>Last Active</th>
+              <th>Quick Actions</th>
+            </tr>
+          </thead>
+          <tbody id="uBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Recent Activity Log -->
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Recent Activity &amp; Payments</h2>
+        <button type="button" class="btn sm danger" id="btnClearLogs">Clear Logs</button>
+      </div>
+      <div class="log-list" id="logBox"></div>
+    </div>
+  </main>
+</div>
+
+<!-- Add Manual Paid User Modal -->
+<div class="modal-bg" id="addModal" hidden>
+  <div class="modal">
+    <div class="m-head">
+      <h3>Add / Upgrade User</h3>
+      <button type="button" class="btn sm" id="closeAdd">✕</button>
+    </div>
+    <label for="mName">Full Name</label>
+    <input type="text" id="mName" placeholder="e.g. Rahul Patel">
+    <label for="mPhone">Mobile Number (10 digits)</label>
+    <input type="tel" id="mPhone" maxlength="10" inputmode="numeric" placeholder="e.g. 9876543210">
+    <label for="mPlan">Assign Plan</label>
+    <select id="mPlan">
+      <option value="pack99">₹99 Pack — 3 Clean Downloads</option>
+      <option value="pass149">₹149 Pass — 6 Months Unlimited</option>
+      <option value="free">Free Plan</option>
+    </select>
+    <div class="err-txt" id="addErr"></div>
+    <button type="button" class="btn primary" id="saveAdd" style="width:100%;margin-top:8px">Save User &amp; Activate Plan</button>
+  </div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const ADMIN_ID='931316';
+const ADMIN_PASS='kushal';
+const AUTH_SESSION='hk721_admin_auth_v1';
+const USERS_KEY='hk721_admin_users_v1';
+const LOGS_KEY='hk721_admin_logs_v1';
+
+let filter='all',query='';
+
+/* Theme */
+(()=>{
+  try{const t=localStorage.getItem('ui_theme_v4');if(t==='dark'||t==='light')document.documentElement.dataset.theme=t}catch(e){}
+  $('btnTheme').onclick=()=>{
+    const next=document.documentElement.dataset.theme==='dark'?'light':'dark';
+    document.documentElement.dataset.theme=next;
+    try{localStorage.setItem('ui_theme_v4',next)}catch(e){}
+  };
+})();
+
+/* Auth Check */
+function checkAuth(){
+  const ok=sessionStorage.getItem(AUTH_SESSION)==='1';
+  $('loginView').hidden=ok;
+  $('dashView').hidden=!ok;
+  if(ok)renderDash();
+}
+$('loginForm').onsubmit=e=>{
+  e.preventDefault();
+  const id=$('admId').value.trim(),pw=$('admPass').value;
+  if(id===ADMIN_ID&&pw===ADMIN_PASS){
+    sessionStorage.setItem(AUTH_SESSION,'1');
+    $('loginErr').textContent='';
+    checkAuth();
+  }else{
+    $('loginErr').textContent='Invalid Admin ID or Password.';
+  }
+};
+$('btnLogout').onclick=()=>{
+  sessionStorage.removeItem(AUTH_SESSION);
+  $('admPass').value='';
+  checkAuth();
+};
+
+/* Storage Helpers */
+function getUsers(){try{return JSON.parse(localStorage.getItem(USERS_KEY)||'[]')}catch(e){return[]}}
+function setUsers(arr){try{localStorage.setItem(USERS_KEY,JSON.stringify(arr))}catch(e){}}
+function getLogs(){try{return JSON.parse(localStorage.getItem(LOGS_KEY)||'[]')}catch(e){return[]}}
+function setLogs(arr){try{localStorage.setItem(LOGS_KEY,JSON.stringify(arr))}catch(e){}}
+function addLog(name,phone,action,detail,amount=0){
+  const logs=getLogs();
+  logs.unshift({id:'ev_'+Date.now().toString(36),at:Date.now(),name,phone,action,detail,amount});
+  setLogs(logs.slice(0,200));
+}
+
+function isUserActivePaid(u){
+  if(u.plan==='pack99')return (u.credits||0)>0;
+  if(u.plan==='pass149')return (u.expiresAt||0)>Date.now();
+  return false;
+}
+function fmtDate(ts){
+  if(!ts)return '—';
+  return new Date(ts).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+}
+function fmtDateTime(ts){
+  if(!ts)return '—';
+  return new Date(ts).toLocaleString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+}
+function esc(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+
+function updatePlan(phone,newPlan){
+  const list=getUsers();
+  const u=list.find(x=>x.phone===phone);if(!u)return;
+  const now=Date.now();
+  if(newPlan==='pack99'){
+    u.plan='pack99';u.credits=3;u.expiresAt=0;u.totalSpent=(u.totalSpent||0)+99;
+    addLog(u.name,u.phone,'Admin Grant','Assigned ₹99 Pack (3 Downloads)',99);
+  }else if(newPlan==='pass149'){
+    u.plan='pass149';u.credits=9999;u.expiresAt=now+180*24*60*60*1000;u.totalSpent=(u.totalSpent||0)+149;
+    addLog(u.name,u.phone,'Admin Grant','Assigned ₹149 Pass (6 Months)',149);
+  }else{
+    u.plan='free';u.credits=0;u.expiresAt=0;
+    addLog(u.name,u.phone,'Admin Update','Switched to Free Plan',0);
+  }
+  u.adminOverrideAt=now;u.lastActive=now;
+  setUsers(list);renderDash();
+}
+function deleteUser(phone){
+  const list=getUsers().filter(x=>x.phone!==phone);
+  setUsers(list);renderDash();
+}
+
+function renderDash(){
+  const users=getUsers();
+  let c99=0,c149=0,cFree=0,rev=0,dlPaid=0,dlFree=0;
+  users.forEach(u=>{
+    rev+=(u.totalSpent||0);
+    dlPaid+=(u.paidDownloads||0);
+    dlFree+=(u.freeDownloads||0);
+    if(u.plan==='pack99'&&(u.credits||0)>0)c99++;
+    else if(u.plan==='pass149'&&(u.expiresAt||0)>Date.now())c149++;
+    else cFree++;
+  });
+  $('kPaid').textContent=c99+c149;
+  $('kPaidSub').textContent=`${c99} on ₹99 • ${c149} on ₹149`;
+  $('kRev').textContent='₹'+rev.toLocaleString('en-IN');
+  $('k99').textContent=c99;
+  $('k149').textContent=c149;
+  $('kTotal').textContent=users.length;
+  $('kFreeSub').textContent=cFree+' free user(s)';
+  $('kDl').textContent=dlPaid+dlFree;
+  $('kDlSub').textContent=`${dlPaid} HD Paid • ${dlFree} Free`;
+
+  const q=query.trim().toLowerCase();
+  const shown=users.filter(u=>{
+    const paid=isUserActivePaid(u);
+    if(filter==='paid'&&!paid)return false;
+    if(filter==='pack99'&&!(u.plan==='pack99'&&(u.credits||0)>0))return false;
+    if(filter==='pass149'&&!(u.plan==='pass149'&&(u.expiresAt||0)>Date.now()))return false;
+    if(filter==='free'&&paid)return false;
+    if(q&&!((u.name||'').toLowerCase().includes(q)||(u.phone||'').toLowerCase().includes(q)))return false;
+    return true;
+  });
+
+  const tb=$('uBody');tb.textContent='';
+  if(!shown.length){
+    tb.innerHTML='<tr><td colspan="7" class="empty">No matching users yet. Login on the main app or click <b>+ Add Paid User</b> / <b>Load Demo Users</b>.</td></tr>';
+  }else{
+    shown.forEach(u=>{
+      const tr=document.createElement('tr');
+      let badge='<span class="tag free">Free</span>',val='Watermark PDF';
+      if(u.plan==='pack99'&&(u.credits||0)>0){
+        badge='<span class="tag p99">₹99 Pack</span>';
+        val=`<b>${u.credits}</b> / 3 downloads left`;
+      }else if(u.plan==='pass149'&&(u.expiresAt||0)>Date.now()){
+        badge='<span class="tag p149">₹149 • 6 Months</span>';
+        val='Valid till <b>'+fmtDate(u.expiresAt)+'</b>';
+      }
+      tr.innerHTML=`
+        <td><div class="u-name">${esc(u.name||'User')}</div><div class="u-ph">${esc(u.phone)}</div></td>
+        <td>${badge}</td>
+        <td>${val}</td>
+        <td><b>${u.paidDownloads||0}</b> HD / ${u.freeDownloads||0} Free</td>
+        <td><b>₹${(u.totalSpent||0).toLocaleString('en-IN')}</b></td>
+        <td>${fmtDateTime(u.lastActive||u.joinedAt)}</td>
+        <td><div class="act-g">
+          <button type="button" class="btn sm" data-a="99">₹99</button>
+          <button type="button" class="btn sm" data-a="149">₹149</button>
+          <button type="button" class="btn sm" data-a="free">Free</button>
+          <button type="button" class="btn sm danger" data-a="del">✕</button>
+        </div></td>`;
+      tr.querySelector('[data-a="99"]').onclick=()=>updatePlan(u.phone,'pack99');
+      tr.querySelector('[data-a="149"]').onclick=()=>updatePlan(u.phone,'pass149');
+      tr.querySelector('[data-a="free"]').onclick=()=>updatePlan(u.phone,'free');
+      tr.querySelector('[data-a="del"]').onclick=()=>deleteUser(u.phone);
+      tb.appendChild(tr);
+    });
+  }
+
+  const logs=getLogs(),lb=$('logBox');lb.textContent='';
+  if(!logs.length){
+    lb.innerHTML='<div class="empty">No activity logs yet.</div>';
+  }else{
+    logs.slice(0,40).forEach(ev=>{
+      const d=document.createElement('div');d.className='log-row';
+      d.innerHTML=`<div><b>${esc(ev.action)}</b> — ${esc(ev.name)} (${esc(ev.phone)}) • ${esc(ev.detail)}${ev.amount?` <b>(+₹${ev.amount})</b>`:''}</div><div class="log-time">${fmtDateTime(ev.at)}</div>`;
+      lb.appendChild(d);
+    });
+  }
+}
+
+/* Filters & Search */
+$('filterPills').querySelectorAll('.pill').forEach(b=>b.onclick=()=>{
+  filter=b.dataset.f;
+  $('filterPills').querySelectorAll('.pill').forEach(x=>x.classList.toggle('on',x===b));
+  renderDash();
+});
+$('qSearch').oninput=e=>{query=e.target.value;renderDash()};
+$('btnRefresh').onclick=renderDash;
+$('btnClearLogs').onclick=()=>{setLogs([]);renderDash()};
+
+/* Add Manual User Modal */
+$('btnAddUser').onclick=()=>{$('mName').value='';$('mPhone').value='';$('mPlan').value='pass149';$('addErr').textContent='';$('addModal').hidden=false;$('mName').focus()};
+$('closeAdd').onclick=()=>{$('addModal').hidden=true};
+$('addModal').onclick=e=>{if(e.target===$('addModal'))$('addModal').hidden=true};
+$('mPhone').oninput=e=>{e.target.value=e.target.value.replace(/\D/g,'').slice(0,10)};
+$('saveAdd').onclick=()=>{
+  const nm=$('mName').value.trim(),ph=$('mPhone').value.trim(),pl=$('mPlan').value;
+  if(!nm){$('addErr').textContent='Enter user name.';return}
+  if(!/^[6-9]\d{9}$/.test(ph)){$('addErr').textContent='Enter a valid 10-digit mobile number.';return}
+  const fullPh='+91 '+ph,now=Date.now();
+  const list=getUsers();
+  let u=list.find(x=>x.phone===fullPh);
+  if(!u){u={id:'u_'+now.toString(36),name:nm,phone:fullPh,plan:'free',credits:0,expiresAt:0,paidDownloads:0,freeDownloads:0,totalSpent:0,joinedAt:now,lastActive:now};list.unshift(u)}
+  u.name=nm;u.plan=pl;u.adminOverrideAt=now;u.lastActive=now;
+  if(pl==='pack99'){u.credits=3;u.expiresAt=0;u.totalSpent=(u.totalSpent||0)+99;addLog(nm,fullPh,'Manual Paid User','₹99 Pack (3 Downloads)',99)}
+  else if(pl==='pass149'){u.credits=9999;u.expiresAt=now+180*24*60*60*1000;u.totalSpent=(u.totalSpent||0)+149;addLog(nm,fullPh,'Manual Paid User','₹149 Pass (6 Months)',149)}
+  else{u.credits=0;u.expiresAt=0;addLog(nm,fullPh,'Manual User','Added as Free',0)}
+  setUsers(list);$('addModal').hidden=true;renderDash();
+};
+
+/* Load Sample Demo Users (for previewing dashboard analytics) */
+$('btnDemoToggle').onclick=()=>{
+  const now=Date.now(),day=86400000;
+  const existing=getUsers();
+  const demos=[
+    {id:'d1',name:'Aarav Patel',phone:'+91 9825011223',plan:'pass149',credits:9999,expiresAt:now+172*day,paidDownloads:4,freeDownloads:1,totalSpent:149,joinedAt:now-8*day,lastActive:now-3600000},
+    {id:'d2',name:'Priya Shah',phone:'+91 9879044556',plan:'pack99',credits:2,expiresAt:0,paidDownloads:1,freeDownloads:0,totalSpent:99,joinedAt:now-3*day,lastActive:now-7200000},
+    {id:'d3',name:'Meet Gajera',phone:'+91 9724088990',plan:'pass149',credits:9999,expiresAt:now+165*day,paidDownloads:6,freeDownloads:2,totalSpent:149,joinedAt:now-15*day,lastActive:now-18000000},
+    {id:'d4',name:'Kajal Desai',phone:'+91 9909933441',plan:'free',credits:0,expiresAt:0,paidDownloads:0,freeDownloads:2,totalSpent:0,joinedAt:now-2*day,lastActive:now-22000000}
+  ];
+  demos.forEach(d=>{if(!existing.some(x=>x.phone===d.phone))existing.push(d)});
+  setUsers(existing);
+  addLog('Admin','931316','Demo Data','Loaded 4 sample users for preview',0);
+  renderDash();
+};
+
+/* Export CSV */
+$('btnExportCsv').onclick=()=>{
+  const rows=[['Name','Mobile','Plan','Credits Left','Valid Till','Paid Downloads','Free Downloads','Total Spent (INR)','Last Active']];
+  getUsers().forEach(u=>{
+    rows.push([
+      u.name||'',u.phone||'',u.plan==='pass149'?'₹149 (6 Months)':(u.plan==='pack99'?'₹99 (3 DL)':'Free'),
+      u.plan==='pack99'?(u.credits||0):(u.plan==='pass149'?'Unlimited':0),
+      u.plan==='pass149'?fmtDate(u.expiresAt):'-',
+      u.paidDownloads||0,u.freeDownloads||0,u.totalSpent||0,fmtDateTime(u.lastActive||u.joinedAt)
+    ]);
+  });
+  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download='hk721_biodata_users.csv';
+  document.body.appendChild(a);a.click();a.remove();
+};
+
+window.addEventListener('storage',()=>{if(sessionStorage.getItem(AUTH_SESSION)==='1')renderDash()});
+checkAuth();
+</script>
+</body>
+</html>
